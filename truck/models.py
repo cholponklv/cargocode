@@ -11,4 +11,3 @@ class Truck(models.Model):
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
     year = models.IntegerField()
     max_load_capacity = models.DecimalField(max_digits=5, decimal_places=2)
-    max_volume = models.DecimalField(max_digits=6, decimal_places=2)

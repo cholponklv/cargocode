@@ -8,6 +8,6 @@ class Shipper(models.Model):
     billing_address = models.CharField(max_length=100)
 
     def __str__(self):
-        return self.user.username
+        return self.user.email
 
 

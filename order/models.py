@@ -7,12 +7,16 @@ from driver.models import Driver
 from company.models import Company
 
 # Create your models here.
-class OrderType(models.Model):
+class CargoType(models.Model):
     name = models.CharField(max_length=50)
 
 
 class Order(models.Model):
-    order_type = models.ForeignKey(OrderType, on_delete=models.CASCADE)
+    CHOICES = (
+        ('quick', 'qucik'),
+        ('slow', 'slow'),
+    )
+    cargo_type = models.ForeignKey(CargoType, on_delete=models.CASCADE)
     weight = models.DecimalField(max_digits=6, decimal_places=2)
     loading_loc = models.CharField(max_length=123)
     delivery_dest = models.CharField(max_length=123)
@@ -20,5 +24,6 @@ class Order(models.Model):
     shipper = models.ForeignKey(Shipper, on_delete=models.CASCADE)
     driver = models.ForeignKey(Driver, on_delete=models.CASCADE)
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
-    volume = models.DecimalField(max_digits=6, decimal_places=2,default=0)
+    delivery_type = models.CharField(choices=CHOICES)
+
 
