@@ -1,5 +1,8 @@
 from django.db import models
+
 from user.models import User
+
+
 # Create your models here.
 
 class Shipper(models.Model):
@@ -9,5 +12,3 @@ class Shipper(models.Model):
 
     def __str__(self):
         return self.user.email
-
-

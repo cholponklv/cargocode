@@ -1,9 +1,16 @@
-from django.shortcuts import render
 from .models import Order
 from shipper.models import Shipper
 from .serializers import OrderSerializer
-from rest_framework import generics,mixins, viewsets , filters
+from rest_framework import viewsets
 from .permissions import IsOwner
+from rest_framework import viewsets
+
+from shipper.models import Shipper
+from .models import Order
+from .permissions import IsOwner
+from .serializers import OrderSerializer
+
+
 # Create your views here.
 
 class OrdersViewSet(viewsets.ModelViewSet):
@@ -16,4 +23,4 @@ class OrdersViewSet(viewsets.ModelViewSet):
             return Order.objects.all()
         print(self.request.user)
         shipper = Shipper.objects.get(user=self.request.user)
-        return Order.objects.filter(shipper = shipper)
+        return Order.objects.filter(shipper=shipper)

@@ -1,10 +1,10 @@
-from django.shortcuts import render
-
 # Create your views here.
 
-from .serializers import TruckSerializer
-from .models import Truck
 from rest_framework import viewsets
+
+from .models import Truck
+from .serializers import TruckSerializer
+
 
 # Create your views here.
 class TruckViewSet(viewsets.ModelViewSet):

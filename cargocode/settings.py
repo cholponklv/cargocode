@@ -18,7 +18,6 @@ environ.Env.read_env('.env')
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
@@ -30,28 +29,34 @@ DEBUG = env('DEBUG', cast=bool)
 
 ALLOWED_HOSTS = []
 
-
 # Application definition
 
-INSTALLED_APPS = [
+DJANGO_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'company',
-    'driver',
-    'order',
-    'shipper',
-    'truck',
-    'user',
+]
+
+THIRD_PARTY_APPS = [
     'rest_framework',
     'phonenumber_field',
     'rest_framework.authtoken',
     'drf_spectacular',
     'drf_spectacular_sidecar',
 ]
+
+LOCAL_APPS = [
+    'company',
+    'driver',
+    'order',
+    'shipper',
+    'truck',
+    'user',
+]
+INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -83,37 +88,35 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'cargocode.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
-    'default':{
+    'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME' : env('DB_NAME'),
+        'NAME': env('DB_NAME'),
         'USER': env('DB_USER'),
         'HOST': env('DB_HOST'),
         'PORT': env('DB_PORT'),
-        'PASSWORD' : env('DB_PASSWORD')
+        'PASSWORD': env('DB_PASSWORD')
 
     }
 }
 
 REST_FRAMEWORK = {
-'DEFAULT_AUTHENTICATION_CLASSES': (
-    'rest_framework.authentication.TokenAuthentication',
-),
-'DEFAULT_PERMISSION_CLASSES': (
-    'rest_framework.permissions.IsAuthenticated',
-),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 
 }
 
-
 SPECTACULAR_SETTINGS = {
-    "TITLE": "Miracle API's",
-    'DESCRIPTION': 'Miracle description',
+    "TITLE": "CargoCode API's",
+    'DESCRIPTION': 'CargoCode description',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
     'SWAGGER_UI_DIST': 'SIDECAR',  # shorthand to use the sidecar instead
@@ -140,18 +143,16 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru-ru'
 
 TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/

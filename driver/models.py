@@ -1,6 +1,6 @@
 from django.db import models
+
 from user.models import User
-# Create your models here.
 
 
 class Driver(models.Model):
@@ -8,9 +8,9 @@ class Driver(models.Model):
     experience = models.IntegerField()
     rpm = models.IntegerField()
     rating = models.IntegerField()
+
     def __str__(self):
         return self.user.email
-
 
 
 class DriverDocument(models.Model):
@@ -18,11 +18,12 @@ class DriverDocument(models.Model):
     document = models.FileField(upload_to='document')
     type = models.ForeignKey('driver.DocumentType', on_delete=models.CASCADE)
 
+
 class DocumentType(models.Model):
     CHOICES = (
         ('company', 'company'),
         ('shipper', 'shipper'),
-        ('driver','driver')
+        ('driver', 'driver')
     )
     name = models.CharField(max_length=100)
     type = models.CharField(choices=CHOICES)

@@ -1,9 +1,10 @@
-from django.db import models
-
 # Create your models here.
 from django.db import models
-from driver.models import Driver
+
 from company.models import Company
+from driver.models import Driver
+
+
 # Create your models here.
 class Truck(models.Model):
     name = models.CharField(max_length=100)

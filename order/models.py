@@ -6,14 +6,14 @@ from shipper.models import Shipper
 from driver.models import Driver
 from company.models import Company
 
-# Create your models here.
+
 class CargoType(models.Model):
     name = models.CharField(max_length=50)
 
 
 class Order(models.Model):
     CHOICES = (
-        ('quick', 'qucik'),
+        ('quick', 'quick'),
         ('slow', 'slow'),
     )
     cargo_type = models.ForeignKey(CargoType, on_delete=models.CASCADE)
@@ -25,5 +25,3 @@ class Order(models.Model):
     driver = models.ForeignKey(Driver, on_delete=models.CASCADE)
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
     delivery_type = models.CharField(choices=CHOICES)
-
-
