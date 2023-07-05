@@ -9,6 +9,8 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from .serializers import UserRegisterSerializer, LoginSerializer, UserSerializer
+from django.utils import timezone
+from rest_framework_simplejwt.tokens import RefreshToken
 
 User = get_user_model()
 
@@ -34,25 +36,30 @@ class RegisterUserView(CreateAPIView):
             data = serializer.errors
             return Response(data)
 
+from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
+
 
 class LoginApiView(generics.GenericAPIView):
     authentication_classes = ()
     permission_classes = ()
     serializer_class = LoginSerializer
 
-    def post(self, request):
-        serializer = self.get_serializer(data=request.data)
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
-        email = serializer.validated_data['email']
-        password = serializer.validated_data['password']
-        user = authenticate(request=request, email=email, password=password)
-
+        user = authenticate(**serializer.validated_data)
         if not user:
             raise AuthenticationFailed()
+        user.last_login = timezone.now()
+        user.save()
 
-        token, _ = Token.objects.get_or_create(user=user)
+        refresh = RefreshToken.for_user(user)
         data = {
-            'token': token.key,
-            'user': UserSerializer(user).data,
+            "user": UserSerializer(instance=user, context={'request': request}).data,
+            "refresh": str(refresh),
+            "access": str(refresh.access_token)
         }
-        return Response(data=data, status=200)
+
+        return Response(data=data, status=status.HTTP_200_OK)

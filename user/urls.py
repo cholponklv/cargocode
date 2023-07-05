@@ -1,6 +1,7 @@
 from django.urls import path
 
 from .views import RegisterUserView, LoginApiView
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 urlpatterns = [
     path('v1/signup/', RegisterUserView.as_view(), name='signup'),
