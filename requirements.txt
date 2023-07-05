@@ -13,7 +13,6 @@ jsonschema==4.17.3
 Markdown==3.4.3
 phonenumbers==8.13.15
 Pillow==10.0.0
-psycopg2==2.9.6
 psycopg2-binary==2.9.6
 pyrsistent==0.19.3
 pytz==2023.3
