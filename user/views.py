@@ -63,3 +63,11 @@ class LoginApiView(generics.GenericAPIView):
         }
 
         return Response(data=data, status=status.HTTP_200_OK)
+
+
+class GetUserView(generics.GenericAPIView):
+    serializer_class = UserSerializer
+    pagination_class = None
+
+    def get(self, request):
+        return Response(data=self.get_serializer(instance=request.user).data)
