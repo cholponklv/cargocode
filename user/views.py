@@ -8,6 +8,7 @@ from rest_framework.generics import CreateAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
+from company.serializers import CompanySerializer
 from driver.serializers import DriverSerializer
 from shipper.serializers import ShipperSerializer
 from user import serializers
@@ -16,6 +17,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 import random
 from django.core.mail import send_mail
 from django.conf import settings
+from rest_framework_simplejwt.token_blacklist.models import OutstandingToken, BlacklistedToken
 
 User = get_user_model()
 
@@ -123,6 +125,38 @@ class DriverRegisterView(CreateAPIView):
         return Response(data, status=status.HTTP_201_CREATED)
 
 
+class CompanyRegisterView(CreateAPIView):
+    serializer_class = serializers.CompanyRegisterSerializer
+    permission_classes = ()
+    authentication_classes = ()
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        company_employee = serializer.save()
+        user = company_employee.user
+
+        # Генерация и отправка кода подтверждения на почту
+        confirmation_code = generate_confirmation_code()
+        user.verification_code = confirmation_code
+        user.save()
+
+        send_confirmation_email(user.email, confirmation_code)
+
+        # Генерация и возврат токена
+        company_data = CompanySerializer(instance=company_employee.company, context={'request': request}).data
+        company_data['position'] = company_employee.position
+        company_data['user'] = serializers.UserSerializer(instance=user, context={'request': request}).data
+        refresh = RefreshToken.for_user(user)
+        data = {
+            'company': company_data,
+            "token": str(refresh.access_token)
+        }
+
+        return Response(data, status=status.HTTP_201_CREATED)
+
+
+
 class LoginApiView(generics.GenericAPIView):
     authentication_classes = ()
     permission_classes = ()
@@ -148,16 +182,12 @@ class LoginApiView(generics.GenericAPIView):
         return Response(data=data, status=status.HTTP_200_OK)
 
 
-class LogoutView(generics.GenericAPIView):
+class LogoutAPIView(generics.GenericAPIView):
     def post(self, request):
-        try:
-            refresh_token = request.data["refresh_token"]
-            token = RefreshToken(refresh_token)
-            token.blacklist()
-
-            return Response(status=status.HTTP_205_RESET_CONTENT)
-        except Exception as e:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+        tokens = OutstandingToken.objects.filter(user_id=request.user.id)
+        for token in tokens:
+            t, _ = BlacklistedToken.objects.get_or_create(token=token)
+        return Response(status=status.HTTP_205_RESET_CONTENT)
 
 
 class GetUserView(generics.GenericAPIView):
