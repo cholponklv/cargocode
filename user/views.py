@@ -39,11 +39,17 @@ class EmailVerificationView(generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
         code = serializer.validated_data.get('code')
 
-        try:
-            user = User.objects.get(verification_code=code, is_verified=False)
-        except User.DoesNotExist:
+        user = request.user
+
+        if user.verification_code != code:
             return Response(
-                {"detail": "Invalid confirmation code."},
+                {"detail": "Invalid verification code."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if user.is_verified:
+            return Response(
+                {"detail": "User already verified."},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -123,6 +129,7 @@ class LoginApiView(generics.GenericAPIView):
     serializer_class = serializers.LoginSerializer
 
     def post(self, request, *args, **kwargs):
+        print(request.data)
         serializer = self.get_serializer(data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
         user = authenticate(**serializer.validated_data)
@@ -139,6 +146,18 @@ class LoginApiView(generics.GenericAPIView):
         }
 
         return Response(data=data, status=status.HTTP_200_OK)
+
+
+class LogoutView(generics.GenericAPIView):
+    def post(self, request):
+        try:
+            refresh_token = request.data["refresh_token"]
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+
+            return Response(status=status.HTTP_205_RESET_CONTENT)
+        except Exception as e:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 class GetUserView(generics.GenericAPIView):
