@@ -3,7 +3,24 @@ from django.contrib.auth.models import PermissionsMixin
 from django.db import models
 
 
-# Create your models here.
+class RoleChoice:
+    superuser = 'superuser'
+    shipper = 'shipper'
+    driver = 'driver'
+    company_admin = 'company_admin'
+
+    @classmethod
+    def choices(cls):
+        return (
+            (cls.superuser, cls.superuser),
+            (cls.shipper, cls.shipper),
+            (cls.driver, cls.driver),
+            (cls.company_admin, cls.company_admin),
+        )
+
+    @classmethod
+    def all(cls):
+        return cls.superuser, cls.shipper, cls.driver, cls.company_admin
 
 
 class CustomUserManager(BaseUserManager):
@@ -24,15 +41,12 @@ class CustomUserManager(BaseUserManager):
             raise ValueError('Superuser must have is_staff=True.')
         if extra_fields.get('is_superuser') is not True:
             raise ValueError('Superuser must have is_superuser=True.')
+        extra_fields.setdefault('role', RoleChoice.superuser)
 
         return self.create_user(email, password, **extra_fields)
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-    USER_TYPE_CHOICES = (
-        ('loader', 'Loader'),
-        ('shipper', 'Shipper'),
-    )
 
     email = models.EmailField(unique=True)
     phone_number = models.CharField(max_length=20, unique=True)
@@ -41,6 +55,9 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
+    verification_code = models.CharField(max_length=6, null=True, blank=True)
+    is_verified = models.BooleanField(default=False)
+    role = models.CharField(max_length=20, choices=RoleChoice.choices(), default=RoleChoice.shipper)
 
     objects = CustomUserManager()
 
