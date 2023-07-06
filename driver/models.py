@@ -7,7 +7,7 @@ class Driver(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     rpm = models.IntegerField()
     experience = models.IntegerField()
-    rating = models.IntegerField()
+    rating = models.IntegerField(default=0)
     city = models.CharField(max_length=100, null=True,blank=True)
     is_available = models.BooleanField(default=True)
     company = models.ForeignKey(Company,on_delete=models.CASCADE,null = True,blank=True)
