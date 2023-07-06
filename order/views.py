@@ -13,14 +13,18 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from driver.models import Driver
 from order.models import OrderOffer
-
+from django_filters import rest_framework as dj_filters
+from rest_framework import generics,mixins, viewsets, filters
+from .filters import OrderFilter,OrderOfferFilter
 # Create your views here.
 
 class OrdersViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
-
-
+    filter_backends = (dj_filters.DjangoFilterBackend, filters.OrderingFilter, filters.SearchFilter)
+    filterset_class = OrderFilter
+    ordering_fields = '__all__'
+    search_fields =  ('loading_loc','loading_city','delivery_dest','delivery_city','status')
     def get_queryset(self):
         
         if self.request.user.is_staff:
@@ -109,3 +113,8 @@ class OrdersViewSet(viewsets.ModelViewSet):
 class OrdersOfferViewSet(viewsets.ModelViewSet):
     queryset = OrderOffer.objects.all()
     serializer_class = OrderOfferSerializer
+    permission_classes = [IsOwner]
+    filter_backends = (dj_filters.DjangoFilterBackend, filters.OrderingFilter, filters.SearchFilter)
+    filterset_class = OrderOfferFilter
+    ordering_fields = '__all__'
+    search_fields =  ('driver_price')
