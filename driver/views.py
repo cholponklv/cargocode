@@ -31,4 +31,10 @@ class DriverViewSet(viewsets.ModelViewSet):
                 is_available=True
             )
             return drivers
+        if hasattr(self.request.user, 'companyemployee'):
+            employcompany = self.request.user.companyemployee.company
+            drivers = Driver.objects.filter(
+                company=employcompany
+            )
+            return drivers
         return Driver.objects.all()

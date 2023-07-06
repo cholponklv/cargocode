@@ -4,7 +4,7 @@ from django.db import models
 from django.db import models
 from shipper.models import Shipper
 from driver.models import Driver
-from company.models import Company
+from company.models import Company,CompanyEmployee
 
 
 class CargoType(models.Model):
@@ -40,7 +40,8 @@ class Order(models.Model):
 
 class OrderOffer(models.Model):
     order = models.ForeignKey(Order,on_delete=models.CASCADE)
-    driver = models.ForeignKey(Driver, on_delete=models.CASCADE)
+    driver = models.ForeignKey(Driver, on_delete=models.CASCADE,blank=True,null=True)
+    companyemployee = models.ForeignKey(CompanyEmployee, on_delete=models.CASCADE,blank=True,null=True)
     driver_price = models.IntegerField(null=True,blank=True)
     rpm = models.IntegerField(blank=True,null=True)
 
