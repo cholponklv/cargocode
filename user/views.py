@@ -36,10 +36,6 @@ class RegisterUserView(CreateAPIView):
             data = serializer.errors
             return Response(data)
 
-from rest_framework_simplejwt.views import TokenObtainPairView
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
-
 
 class LoginApiView(generics.GenericAPIView):
     authentication_classes = ()
