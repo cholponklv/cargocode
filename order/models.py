@@ -30,7 +30,7 @@ class Order(models.Model):
     delivery_dest = models.CharField(max_length=123)
     delivery_city = models.CharField(max_length=100,null=True,blank=True)
     price = models.DecimalField(max_digits=15, decimal_places=2)
-    shipper = models.ForeignKey(Shipper, on_delete=models.CASCADE)
+    shipper = models.ForeignKey(Shipper, on_delete=models.CASCADE, null=True, blank=True)
     driver = models.ForeignKey(Driver, on_delete=models.CASCADE,null = True, blank=True)
     company = models.ForeignKey(Company, on_delete=models.CASCADE,null=True,blank=True)
     delivery_type = models.CharField(choices=CHOICES,default="slow")

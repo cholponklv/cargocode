@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 from .models import Order, CargoType
 from shipper.models import Shipper
 from .serializers import OrderSerializer,OrderOfferSerializer ,SelectDriverSerializer,CargoTypeSerializer
@@ -10,12 +9,10 @@ from shipper.models import Shipper
 from .models import Order
 from .permissions import IsOwner,IsDriver ,IsCompanyEmployee
 from .serializers import OrderSerializer
-=======
 from .serializers import OrderOfferSerializer, CargoTypeSerializer
 from django_filters import rest_framework as dj_filters
 from rest_framework import status
 from rest_framework import viewsets, filters
->>>>>>> 3bafcbbe71771d00aac66a0f1bb2d4efe55239fb
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
@@ -49,6 +46,9 @@ class OrdersViewSet(viewsets.ModelViewSet):
             return Order.objects.filter(shipper=shipper)
 
         return Order.objects.all()
+    
+    def perform_create(self, serializer):
+        serializer.save(shipper=self.request.user.shipper)
 
     @action(detail=True, methods=['POST'], permission_classes=[IsOwner | IsDriver | IsCompanyEmployee])
     def offers(self, request, pk=None):
