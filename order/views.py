@@ -1,13 +1,13 @@
 from .models import Order, CargoType
 from shipper.models import Shipper
-from .serializers import OrderSerializer,OrderOfferSerializer ,SelectDriverSerializer,CargoTypeSerializer
+from .serializers import OrderSerializer, OrderOfferSerializer, SelectDriverSerializer, CargoTypeSerializer
 from rest_framework import viewsets
 from .permissions import IsOwner, IsAdmin
-from rest_framework import viewsets,status
+from rest_framework import viewsets, status
 from company.models import Company
 from shipper.models import Shipper
 from .models import Order
-from .permissions import IsOwner,IsDriver ,IsCompanyEmployee
+from .permissions import IsOwner, IsDriver, IsCompanyEmployee
 from .serializers import OrderSerializer
 from .serializers import OrderOfferSerializer, CargoTypeSerializer
 from django_filters import rest_framework as dj_filters
@@ -37,7 +37,7 @@ class OrdersViewSet(viewsets.ModelViewSet):
     search_fields = ('loading_loc', 'loading_city', 'delivery_dest', 'delivery_city', 'status')
 
     def get_queryset(self):
-        queryset = Order.objects.all().select_related('driver', 'company', 'shipper', 'cargo_type').\
+        queryset = Order.objects.all().select_related('driver', 'company', 'shipper', 'cargo_type'). \
             prefetch_related('users')
 
         if self.request.user.is_staff:
@@ -130,7 +130,6 @@ class OrdersOfferViewSet(viewsets.ModelViewSet):
     filterset_class = OrderOfferFilter
     ordering_fields = '__all__'
     search_fields = ('driver_price',)
-
 
 
 class CargoTypeViewSet(viewsets.ModelViewSet):
