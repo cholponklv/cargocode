@@ -15,6 +15,7 @@ class OrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = '__all__'
+        read_only_fields = ('shipper',)
 
     def to_representation(self, instance):
         data = super().to_representation(instance)

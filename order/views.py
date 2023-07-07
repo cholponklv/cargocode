@@ -1,3 +1,14 @@
+from .models import Order, CargoType
+from shipper.models import Shipper
+from .serializers import OrderSerializer,OrderOfferSerializer ,SelectDriverSerializer,CargoTypeSerializer
+from rest_framework import viewsets
+from .permissions import IsOwner, IsAdmin
+from rest_framework import viewsets,status
+from company.models import Company
+from shipper.models import Shipper
+from .models import Order
+from .permissions import IsOwner,IsDriver ,IsCompanyEmployee
+from .serializers import OrderSerializer
 from .serializers import OrderOfferSerializer, CargoTypeSerializer
 from django_filters import rest_framework as dj_filters
 from rest_framework import status
@@ -37,6 +48,9 @@ class OrdersViewSet(viewsets.ModelViewSet):
             return queryset.filter(shipper=shipper)
 
         return queryset
+
+    def perform_create(self, serializer):
+        serializer.save(shipper=self.request.user.shipper)
 
     @action(detail=True, methods=['POST'], permission_classes=[IsOwner | IsDriver | IsCompanyEmployee])
     def offers(self, request, pk=None):
@@ -122,6 +136,7 @@ class OrdersOfferViewSet(viewsets.ModelViewSet):
 class CargoTypeViewSet(viewsets.ModelViewSet):
     queryset = CargoType.objects.all()
     serializer_class = CargoTypeSerializer
+    permission_classes = [IsAdmin]
     filter_backends = (filters.OrderingFilter, filters.SearchFilter)
     ordering_fields = ('name',)
     search_fields = ('name',)
