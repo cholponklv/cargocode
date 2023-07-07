@@ -1,8 +1,8 @@
-from .models import Order
+from .models import Order, CargoType
 from shipper.models import Shipper
-from .serializers import OrderSerializer,OrderOfferSerializer ,SelectDriverSerializer
+from .serializers import OrderSerializer,OrderOfferSerializer ,SelectDriverSerializer,CargoTypeSerializer
 from rest_framework import viewsets
-from .permissions import IsOwner
+from .permissions import IsOwner, IsAdmin
 from rest_framework import viewsets,status
 from company.models import Company
 from shipper.models import Shipper
@@ -118,3 +118,9 @@ class OrdersOfferViewSet(viewsets.ModelViewSet):
     filterset_class = OrderOfferFilter
     ordering_fields = '__all__'
     search_fields =  ('driver_price')
+
+
+class CargoTypeViewSet(viewsets.ModelViewSet):
+    queryset = CargoType.objects.all()
+    serializer_class = CargoTypeSerializer
+    permission_classes = [IsAdmin]
