@@ -1,6 +1,7 @@
 from django.db import models
 from user.models import User
 
+
 # Create your models here.
 class Company(models.Model):
     name = models.CharField(max_length=100)
@@ -12,11 +13,10 @@ class Company(models.Model):
         return self.name
 
 
-
 class CompanyEmployee(models.Model):
-    user = models.OneToOneField(User,on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
-    title = models.CharField(max_length=100)
+    position = models.CharField(max_length=100)
 
     def __str__(self):
         return str(self.company)

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 from .models import Order, CargoType
 from shipper.models import Shipper
 from .serializers import OrderSerializer,OrderOfferSerializer ,SelectDriverSerializer,CargoTypeSerializer
@@ -9,13 +10,25 @@ from shipper.models import Shipper
 from .models import Order
 from .permissions import IsOwner,IsDriver ,IsCompanyEmployee
 from .serializers import OrderSerializer
+=======
+from .serializers import OrderOfferSerializer, CargoTypeSerializer
+from django_filters import rest_framework as dj_filters
+from rest_framework import status
+from rest_framework import viewsets, filters
+>>>>>>> 3bafcbbe71771d00aac66a0f1bb2d4efe55239fb
 from rest_framework.decorators import action
 from rest_framework.response import Response
+
+from company.models import Company
 from driver.models import Driver
-from order.models import OrderOffer
-from django_filters import rest_framework as dj_filters
-from rest_framework import generics,mixins, viewsets, filters
-from .filters import OrderFilter,OrderOfferFilter
+from order.models import OrderOffer, CargoType
+from .filters import OrderFilter, OrderOfferFilter
+from .models import Order
+from .permissions import IsOwner, IsDriver, IsCompanyEmployee
+from .serializers import OrderOfferSerializer
+from .serializers import OrderSerializer
+
+
 # Create your views here.
 
 class OrdersViewSet(viewsets.ModelViewSet):
@@ -24,20 +37,20 @@ class OrdersViewSet(viewsets.ModelViewSet):
     filter_backends = (dj_filters.DjangoFilterBackend, filters.OrderingFilter, filters.SearchFilter)
     filterset_class = OrderFilter
     ordering_fields = '__all__'
-    search_fields =  ('loading_loc','loading_city','delivery_dest','delivery_city','status')
+    search_fields = ('loading_loc', 'loading_city', 'delivery_dest', 'delivery_city', 'status')
+
     def get_queryset(self):
-        
+
         if self.request.user.is_staff:
             return Order.objects.all()
-        
+
         if hasattr(self.request.user, 'shipper'):
             shipper = self.request.user.shipper
             return Order.objects.filter(shipper=shipper)
-        
-        return Order.objects.all()
-    
 
-    @action(detail=True, methods=['POST']   , permission_classes = [IsOwner|IsDriver|IsCompanyEmployee])
+        return Order.objects.all()
+
+    @action(detail=True, methods=['POST'], permission_classes=[IsOwner | IsDriver | IsCompanyEmployee])
     def offers(self, request, pk=None):
         order = self.get_object()
         print(self.permission_classes)
@@ -46,18 +59,14 @@ class OrdersViewSet(viewsets.ModelViewSet):
         if hasattr(user, 'driver'):
             driver = user.driver
 
-
             if OrderOffer.objects.filter(order=order, driver=driver).exists():
                 return Response({'error': 'Заявка уже отправлена'}, status=status.HTTP_400_BAD_REQUEST)
 
             order_offer = OrderOffer.objects.create(order=order, driver=driver)
             return Response({'message': 'Заявка успешно отправлена'}, status=status.HTTP_200_OK)
-       
-    
 
         if hasattr(user, 'companyemployee'):
             companyemployee = user.companyemployee
-
 
             if OrderOffer.objects.filter(order=order, companyemployee=companyemployee).exists():
                 return Response({'error': 'Заявка уже отправлена'}, status=status.HTTP_400_BAD_REQUEST)
@@ -65,18 +74,15 @@ class OrdersViewSet(viewsets.ModelViewSet):
             order_offer = OrderOffer.objects.create(order=order, companyemployee=companyemployee)
             return Response({'message': 'Заявка успешно отправлена'}, status=status.HTTP_200_OK)
         return Response({'error': 'У вас нет прав'}, status=status.HTTP_403_FORBIDDEN)
-    
-     
-    
-    
 
-    @action(detail=True, methods=['POST'], url_path='offers/(?P<offer_id>\d+)/accept',permission_classes=[IsOwner])
+    @action(detail=True, methods=['POST'], url_path='offers/(?P<offer_id>\d+)/accept', permission_classes=[IsOwner])
     def accept(self, request, offer_id, pk=None):
         order = self.get_object()
         try:
             order_offer = OrderOffer.objects.get(id=offer_id, order=order)
         except OrderOffer.DoesNotExist:
-            return Response({'error': 'Указан недействительный идентификатор ставки'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Указан недействительный идентификатор ставки'},
+                            status=status.HTTP_400_BAD_REQUEST)
         if order_offer.driver:
             order.driver = order_offer.driver
             if order.driver.company:
@@ -91,24 +97,28 @@ class OrdersViewSet(viewsets.ModelViewSet):
         serializer = OrderSerializer(order)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=['POST'], url_path='assign-driver/(?P<driver_id>\d+)',permission_classes=[IsCompanyEmployee])
+    @action(detail=True, methods=['POST'], url_path='assign-driver/(?P<driver_id>\d+)',
+            permission_classes=[IsCompanyEmployee])
     def assign_driver(self, request, driver_id, pk=None):
         order = self.get_object()
         if request.user.companyemployee.company != order.company:
-            return Response({'error': 'Указан недействительный идентификатор компании'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Указан недействительный идентификатор компании'},
+                            status=status.HTTP_400_BAD_REQUEST)
         try:
-            driver = Driver.objects.get(id = driver_id)
+            driver = Driver.objects.get(id=driver_id)
         except Driver.DoesNotExist:
-            return Response({'error': 'Указан недействительный идентификатор водителя'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Указан недействительный идентификатор водителя'},
+                            status=status.HTTP_400_BAD_REQUEST)
         if driver.company != order.company:
-            return Response({'error': 'Указан недействительный идентификатор водителяя'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'Указан недействительный идентификатор водителяя'},
+                            status=status.HTTP_400_BAD_REQUEST)
         if driver:
-            order.driver =driver
+            order.driver = driver
         order.save()
 
         serializer = OrderSerializer(order)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
+
 
 class OrdersOfferViewSet(viewsets.ModelViewSet):
     queryset = OrderOffer.objects.all()
@@ -117,10 +127,13 @@ class OrdersOfferViewSet(viewsets.ModelViewSet):
     filter_backends = (dj_filters.DjangoFilterBackend, filters.OrderingFilter, filters.SearchFilter)
     filterset_class = OrderOfferFilter
     ordering_fields = '__all__'
-    search_fields =  ('driver_price')
+    search_fields = ('driver_price',)
 
 
 class CargoTypeViewSet(viewsets.ModelViewSet):
     queryset = CargoType.objects.all()
     serializer_class = CargoTypeSerializer
     permission_classes = [IsAdmin]
+    filter_backends = (filters.OrderingFilter, filters.SearchFilter)
+    ordering_fields = ('name',)
+    search_fields = ('name',)

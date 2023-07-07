@@ -1,4 +1,6 @@
 from rest_framework import serializers
+
+from company.models import Company
 # Подключаем модель user
 from .models import User
 from shipper.models import Shipper
@@ -57,6 +59,30 @@ class DriverRegisterSerializer(serializers.ModelSerializer):
         return shipper
 
 
+class CompanyEmployeeSerializer(serializers.Serializer):
+    user = serializers.CharField(max_length=100)
+    company = serializers.CharField(max_length=100)
+    position = serializers.CharField(max_length=100)
+
+class CompanyRegisterSerializer(serializers.Serializer):
+    user = UserRegisterSerializer()
+    company_name = serializers.CharField(max_length=100)
+    address = serializers.CharField(max_length=100)
+    mc = serializers.CharField(max_length=100)
+    dot = serializers.CharField(max_length=100)
+    position = serializers.CharField(max_length=100)
+
+    def create(self, validated_data):
+        user_data = validated_data.pop('user')
+        user_data['role'] = 'company_admin'
+        user = UserRegisterSerializer.create(UserRegisterSerializer(), validated_data=user_data)
+        position = validated_data.pop('position')
+        name = validated_data.pop('company_name')
+        company = Company.objects.create(name=name, **validated_data)
+        company_employee = company.companyemployee_set.create(user=user, position=position)
+        return company_employee
+
+
 class EmailVerificationSerializer(serializers.Serializer):
     code = serializers.CharField(max_length=6)
 
@@ -74,4 +100,4 @@ class LoginSerializer(serializers.Serializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'name', 'phone_number', 'email', 'role')
+        fields = ('id', 'name', 'phone_number', 'email', 'role', 'is_verified')
