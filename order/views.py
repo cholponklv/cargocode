@@ -26,15 +26,17 @@ class OrdersViewSet(viewsets.ModelViewSet):
     search_fields = ('loading_loc', 'loading_city', 'delivery_dest', 'delivery_city', 'status')
 
     def get_queryset(self):
+        queryset = Order.objects.all().select_related('driver', 'company', 'shipper', 'cargo_type').\
+            prefetch_related('users')
 
         if self.request.user.is_staff:
-            return Order.objects.all()
+            return queryset
 
         if hasattr(self.request.user, 'shipper'):
             shipper = self.request.user.shipper
-            return Order.objects.filter(shipper=shipper)
+            return queryset.filter(shipper=shipper)
 
-        return Order.objects.all()
+        return queryset
 
     @action(detail=True, methods=['POST'], permission_classes=[IsOwner | IsDriver | IsCompanyEmployee])
     def offers(self, request, pk=None):
@@ -114,6 +116,7 @@ class OrdersOfferViewSet(viewsets.ModelViewSet):
     filterset_class = OrderOfferFilter
     ordering_fields = '__all__'
     search_fields = ('driver_price',)
+
 
 
 class CargoTypeViewSet(viewsets.ModelViewSet):
