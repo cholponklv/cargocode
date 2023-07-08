@@ -45,6 +45,17 @@ class CustomUserManager(BaseUserManager):
 
         return self.create_user(email, password, **extra_fields)
 
+class Rating(models.Model):
+    user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='rating_user')
+    target_user = models.ForeignKey('User', on_delete=models.CASCADE, related_name='target_user')
+    rating = models.IntegerField()
+    comment = models.CharField(max_length=1000)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self) -> str:
+        output = f'{self.user.name} rated {self.target_user.name} with {self.rating} stars'
+        return output
 
 class User(AbstractBaseUser, PermissionsMixin):
 
@@ -59,10 +70,11 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_verified = models.BooleanField(default=False)
     role = models.CharField(max_length=20, choices=RoleChoice.choices(), default=RoleChoice.shipper)
 
+
     objects = CustomUserManager()
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['phone_number', 'name']
 
     def __str__(self):
-        return self.email
+        return self.id

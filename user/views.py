@@ -5,7 +5,7 @@ from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.generics import CreateAPIView
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from driver.serializers import DriverSerializer
@@ -16,6 +16,14 @@ from rest_framework_simplejwt.tokens import RefreshToken
 import random
 from django.core.mail import send_mail
 from django.conf import settings
+
+from .serializers import UserSerializer
+from rest_framework.exceptions import ValidationError 
+from .models import User, Rating
+from rest_framework import viewsets
+from .permissions import IsShipper, IsDriver, IsCompanyAdmin, IsSuperuser
+from rest_framework import permissions
+from rest_framework.decorators import action, api_view, permission_classes
 
 User = get_user_model()
 
@@ -166,3 +174,31 @@ class GetUserView(generics.GenericAPIView):
 
     def get(self, request):
         return Response(data=self.get_serializer(instance=request.user).data)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_own_rating(request):
+    ratings = Rating.objects.filter(target_user=request.user)
+    serializer = serializers.OwnRatingSerializer(instance=ratings, many=True) 
+    return Response(data=serializer.data)
+
+class OwnRatingView(generics.GenericAPIView):
+    serializer_class = serializers.OwnRatingSerializer
+    permission_classes = (IsAuthenticated,)
+    pagination_class = None
+
+    def get(self, request):
+        user = request.user
+        serializer = self.get_serializer(instance=user) 
+        return Response(data=serializer.data)
+
+# class OtherRatingView(generics.GenericAPIView):
+#     serializer_class = serializers.RatingSerializer
+#     permission_classes = (IsAuthenticated,)
+#     pagination_class = None
+
+#     def get(self, request, pk):
+#         user = User.objects.get(id=pk)
+#         serializer = self.get_serializer(instance=user) 
+#         return Response(data=serializer.data)

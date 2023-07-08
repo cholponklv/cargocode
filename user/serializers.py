@@ -1,6 +1,6 @@
 from rest_framework import serializers
 # Подключаем модель user
-from .models import User
+from .models import User, Rating
 from shipper.models import Shipper
 from driver.models import Driver
 
@@ -75,3 +75,9 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'name', 'phone_number', 'email', 'role')
+
+
+class OwnRatingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Rating
+        fields = ('id', 'rating', 'comment', 'created_at', 'updated_at', 'target_user')
